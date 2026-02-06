@@ -1,4 +1,4 @@
-# Governance Operating Substrate – Forensic Compiler (GOS-FC)
+﻿# Governance Operating Substrate  Forensic Compiler (GOS-FC)
 
 **Deterministic forensic compilation for institutional decision accountability in high-consequence systems**
 
@@ -6,12 +6,12 @@
 
 ## Overview
 
-The **Governance Operating Substrate – Forensic Compiler (GOS-FC)** is a deterministic system that compiles institutional decisions, authority, assumptions, and evidence into replayable, audit-grade forensic artifacts — or fails explicitly when accountability cannot be constructed.
+The **Governance Operating Substrate  Forensic Compiler (GOS-FC)** is a deterministic system that compiles institutional decisions, authority, assumptions, and evidence into replayable, audit-grade forensic artifacts  or fails explicitly when accountability cannot be constructed.
 
 GOS-FC does not detect attacks, assign blame, infer intent, or judge correctness.  
 Its sole function is to answer, with provable rigor:
 
-> **Can this institution’s decision history be reconstructed in a way that survives audit, oversight, litigation, and leadership turnover?**
+> **Can this institutions decision history be reconstructed in a way that survives audit, oversight, litigation, and leadership turnover?**
 
 If the answer is no, GOS-FC fails loudly and deterministically.
 
@@ -88,7 +88,7 @@ After an incident, organizations cannot answer basic questions:
 - What alternatives were considered?
 - When did irreversibility occur?
 
-GOS-FC exists to make those questions answerable — or provably unanswerable.
+GOS-FC exists to make those questions answerable  or provably unanswerable.
 
 ---
 
@@ -258,4 +258,4 @@ If future work contradicts this README, this README is authoritative unless expl
 
 **Jessica Marosi**  
 **Bytelock Technologies**  
-Infrastructure Security • Systems Reasoning • Forensic Accountability
+Infrastructure Security  Systems Reasoning  Forensic Accountability
