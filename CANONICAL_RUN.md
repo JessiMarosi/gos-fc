@@ -11,7 +11,7 @@ If you read only one artifact, read the failure report below.
 ## Canonical Output
 
 **Deterministic Failure Bundle (Fictional Validation Run)**  
- outputs/EXAMPLE_FAILURE_BUNDLE.md
+- [outputs/EXAMPLE_FAILURE_BUNDLE.md](outputs/EXAMPLE_FAILURE_BUNDLE.md)
 
 This bundle is the result of attempting to compile institutional accountability
 from incomplete authority, missing assumptions, and time-shifted evidence.
@@ -23,7 +23,7 @@ The compiler **fails intentionally and deterministically**.
 ## What This Demonstrates
 
 **Claim:**  
-Given incomplete authority and missing decision-time assumptions,  
+Given incomplete authority and missing decision-time assumptions,
 GOS-FC will deterministically fail and enumerate the missing accountability dependencies.
 
 The linked failure bundle is the proof of that claim.
@@ -32,12 +32,17 @@ The linked failure bundle is the proof of that claim.
 
 ## How to Read This Repository
 
-1. Read the failure bundle.
+1. Read the failure bundle:
+   - [outputs/EXAMPLE_FAILURE_BUNDLE.md](outputs/EXAMPLE_FAILURE_BUNDLE.md)
 2. Review the compiler failure semantics:
-   - compiler/FAILURE_CATALOG.md
-   - compiler/PIPELINE.md
-3. Read the doctrine and boundaries **only if** you want to understand
-   why the failure is correct and non-negotiable.
+   - [compiler/FAILURE_CATALOG.md](compiler/FAILURE_CATALOG.md)
+   - [compiler/PIPELINE.md](compiler/PIPELINE.md)
+3. Read the doctrine and boundaries **only if** you want to understand why the failure is correct and non-negotiable:
+   - [README.md](README.md)
+   - [BOUNDARIES.md](BOUNDARIES.md)
+   - [NON_GOALS.md](NON_GOALS.md)
+   - [THREAT_MODEL.md](THREAT_MODEL.md)
+   - [COMPILER_CONTRACT.md](COMPILER_CONTRACT.md)
 
 This repository does not ask you to imagine how the system works.
 
