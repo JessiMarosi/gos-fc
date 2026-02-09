@@ -1,19 +1,38 @@
-﻿# Governance Operating Substrate  Forensic Compiler (GOS-FC)
+﻿# GOS-FC  Governance Operating Substrate: Forensic Compiler
 
-**Deterministic forensic compilation for institutional decision accountability in high-consequence systems**
+## Start Here (Canonical Run)
+
+If you read only one thing, read the compiled output first:
+
+- **[CANONICAL_RUN.md](CANONICAL_RUN.md)**
+- **[outputs/EXAMPLE_FAILURE_BUNDLE.md](outputs/EXAMPLE_FAILURE_BUNDLE.md)** (fictional validation run)
+
+This repository is demonstration-first: the primary evidence is the **bundle output**, not claims in prose.
 
 ---
 
 ## Overview
 
-The **Governance Operating Substrate  Forensic Compiler (GOS-FC)** is a deterministic system that compiles institutional decisions, authority, assumptions, and evidence into replayable, audit-grade forensic artifacts  or fails explicitly when accountability cannot be constructed.
+The **Governance Operating Substrate  Forensic Compiler (GOS-FC)** is a deterministic system that compiles institutional decisions, authority, assumptions, and evidence into replayable, audit-grade forensic artifacts  **or fails explicitly** when accountability cannot be constructed.
 
-GOS-FC does not detect attacks, assign blame, infer intent, or judge correctness.  
+GOS-FC does not detect attacks, assign blame, infer intent, or judge correctness.
 Its sole function is to answer, with provable rigor:
 
 > **Can this institutions decision history be reconstructed in a way that survives audit, oversight, litigation, and leadership turnover?**
 
 If the answer is no, GOS-FC fails loudly and deterministically.
+
+---
+
+## Repository Status (Baseline Freeze)
+
+The compiler surface is **closed**. Expansion requires a formal revision process.
+
+- **[COMPILER_CONTRACT.md](COMPILER_CONTRACT.md)** (closed compiler surface)
+- **[BOUNDARIES.md](BOUNDARIES.md)** / **[NON_GOALS.md](NON_GOALS.md)** / **[THREAT_MODEL.md](THREAT_MODEL.md)** (public safety + misuse constraints)
+
+This repository defines doctrine, compilation semantics, and a fictional validation run.
+It is **not** a product release.
 
 ---
 
@@ -42,12 +61,11 @@ If accountability cannot be compiled, it does not exist.
 
 GOS-FC is not:
 
-- an operating system kernel
 - a SIEM, SOAR, or monitoring platform
 - a governance, risk, or compliance (GRC) dashboard
 - an AI or machine-learning system
 - a behavioral monitoring or surveillance tool
-- an incident response or detection engine
+- an incident response, attribution, or detection engine
 - a blockchain or cryptocurrency system
 - a probabilistic risk scoring framework
 
@@ -98,24 +116,13 @@ GOS-FC follows a strict compilation pipeline.
 
 ### Inputs (Required)
 
-**Decision Records**  
-Explicit statements of what was decided and when.
-
-**Authority Declarations**  
-Who had the authority to decide, and under what scope.
-
-**Assumption Declarations**  
-Conditions treated as true at the time of decision.
-
-**Evidence Artifacts**  
-Documents, configurations, data, or attestations available at the time.
-
-**Custody & Transition Records**  
-How decisions, authority, and artifacts moved across people and systems.
+**Decision Records**  explicit statements of what was decided and when.  
+**Authority Declarations**  who had the authority to decide, and under what scope.  
+**Assumption Declarations**  conditions treated as true at the time of decision.  
+**Evidence Artifacts**  documents, configurations, data, or attestations available at the time.  
+**Custody & Transition Records**  how decisions, authority, and artifacts moved across people and systems.
 
 All inputs must be explicit. Silence is not permitted.
-
----
 
 ### Compilation Rules
 
@@ -129,28 +136,6 @@ All inputs must be explicit. Silence is not permitted.
 
 Violations are deterministic compilation failures.
 
----
-
-### Outputs (On Success)
-
-When compilation succeeds, GOS-FC produces:
-
-- replayable decision timelines
-- authority and assumption graphs
-- hash-sealed forensic bundles
-- verification scripts
-- audit-ready narratives derived strictly from inputs
-
-These artifacts are designed for:
-
-- auditors
-- inspectors general
-- courts
-- oversight bodies
-- successor leadership
-
----
-
 ### Failure Mode (Intentional and Required)
 
 When compilation fails, GOS-FC produces:
@@ -160,7 +145,7 @@ When compilation fails, GOS-FC produces:
 - missing assumption inventories
 - authority ambiguity diagnostics
 
-Failure is not an error state.  
+Failure is not an error state.
 It is the primary signal GOS-FC is designed to surface.
 
 ---
@@ -171,7 +156,7 @@ GOS-FC is the forensic compilation layer of the broader **Governance Operating S
 
 Within the substrate:
 
-- **Axiom Forge** enforces formal obligation discipline
+- **AxiomForge** enforces formal obligation discipline
 - **Cairn** preserves long-horizon reasoning and decision memory
 - **ChainLogic-DCCS** enforces authority and custody transitions
 - **DeepSee-Live** preserves contextual observability
@@ -184,7 +169,7 @@ GOS-FC compiles the outputs of these systems into a single forensic truth set.
 
 ## Validation Methodology
 
-GOS-FC is validated using a **fictionalized, adversarial institutional scenario inspired by publicly reported critical-infrastructure incidents**, allowing full transparency without legal or privacy constraints.
+GOS-FC is validated using a **fictionalized, adversarial institutional scenario inspired by publicly reported critical-infrastructure incidents**, allowing transparency without legal or privacy constraints.
 
 The scenario is intentionally constructed to include:
 
@@ -208,23 +193,6 @@ The criterion is:
 
 ---
 
-## Non-Goals and Explicit Boundaries
-
-GOS-FC explicitly refuses to:
-
-- certify correctness
-- declare legality
-- determine ethics
-- assign blame
-- automate enforcement
-- replace governance bodies
-- substitute for policy or law
-
-GOS-FC preserves truth conditions.  
-Judgment remains human.
-
----
-
 ## Intended Audience
 
 GOS-FC is designed for:
@@ -236,21 +204,6 @@ GOS-FC is designed for:
 - researchers in governance, security, and formal systems
 
 It is not designed for consumer, startup, or growth-driven environments.
-
----
-
-## Repository Status
-
-This repository defines:
-
-- system doctrine
-- compiler model
-- boundaries and non-goals
-- validation methodology
-
-It is **not** a product release.
-
-If future work contradicts this README, this README is authoritative unless explicitly amended.
 
 ---
 
