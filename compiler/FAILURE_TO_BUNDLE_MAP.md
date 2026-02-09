@@ -1,10 +1,10 @@
 ﻿# GOS-FC Failure  Bundle Map (Deterministic Routing Table)
 
-This document maps canonical GOS-FC failure conditions to:
+This document maps **canonical GOS-FC failure codes** to:
 
 - the bundle section that would have contained the required artifact(s),
-- the upstream contract area responsible for producing them, and
-- the compilation stage where the failure must be surfaced.
+- the upstream contract origin responsible for producing them (or feeding them),
+- the pipeline stage where the failure must be surfaced.
 
 This is a **routing table**, not a narrative.
 GOS-FC does not infer missing inputs.
@@ -15,157 +15,221 @@ GOS-FC does not infer missing inputs.
 
 - Manifest
 - Metadata
-- Decisions
-- Authority & Custody
+- Decision Records
+- Authority and Custody
 - Assumptions
 - Evidence
-- Transitions
-- Supersessions
+- Transition Records
+- Supersession Records
 - Context (optional)
 - Integrity (optional)
-- Failures (present on failure)
+- Failure (required on failure)
 - Checksums
 
 ---
 
 ## Upstream Contract Origins (Reference)
 
-- DADS (Decisions / rationale / approvals)
-- ChainLogic-DCCS (Authority transitions / custody)
-- Cairn (Assumptions / reasoning memory)
-- Axiom Forge (optional: obligations)
-- Veridion (optional: integrity states)
-- DeepSee-Live (optional: context)
-- StrataVault (optional: boundary + access provenance)
+- DADS  decisions / rationale / approvals / references
+- ChainLogic-DCCS  authority grants / custody / transitions
+- Cairn  assumptions / reasoning memory
+- AxiomForge (optional)  obligations discipline
+- Veridion (optional)  integrity state declarations
+- DeepSee-Live (optional)  contextual observability
+- StrataVault (optional)  governed boundaries + access provenance
 
 ---
 
-## Routing Table
+## Routing Rules (Deterministic)
 
-> NOTE:
-> Failure IDs below are canonical *classes* intended to align with FAILURE_CATALOG.md.
-> Exact codes may be refined, but the mapping categories must remain stable.
+1. Each failure code maps to one **primary bundle section** where the missing/invalid dependency belongs.
+2. All failures are emitted in the **Failure** section, but this map identifies the *target* section that would have satisfied the dependency.
+3. Upstream origin indicates which system is expected to produce the dependency **or** provide the authoritative feed that enables it.
+4. This map is **normative for routing**: if a code exists in `compiler/FAILURE_CATALOG.md`, its routing must be explicit here (or explicitly marked N/A with justification).
 
 ---
 
-### F-DEC-001  Missing DecisionRecord
+## Routing Table (Canonical)
 
-- **Trigger:** A materially consequential action exists without a DecisionRecord.
-- **Pipeline Stage:** Decision ingestion / decision graph construction
-- **Expected Bundle Section:** Decisions
+### Stage 0  Intake
+
+#### FC-0001  INVALID_INPUT_FORMAT
+- **Primary Bundle Section:** Manifest (run context) + Failure
+- **Upstream Origin:** Any (source artifact producers)
+- **Deterministic Output:** Failure (parse/normalization diagnostics)
+
+#### FC-0002  UNKNOWN_ARTIFACT_TYPE
+- **Primary Bundle Section:** Failure
+- **Upstream Origin:** Any (source artifact producers)
+- **Deterministic Output:** Failure (unknown type; cannot route)
+
+#### FC-0003  DUPLICATE_ID
+- **Primary Bundle Section:** Failure
+- **Upstream Origin:** Any (source artifact producers)
+- **Deterministic Output:** Failure (identifier collision)
+
+---
+
+### Stage 1  Structural Validation
+
+#### FC-0101  SCHEMA_VIOLATION
+- **Primary Bundle Section:** Failure
+- **Upstream Origin:** Any (artifact producers); schemas are defined in `schemas/`
+- **Deterministic Output:** Failure (missing/invalid fields)
+
+---
+
+### Stage 2  Time Binding
+
+#### FC-0201  TIME_UNBOUND_ARTIFACT
+- **Primary Bundle Section:** (Depends on artifact class) + Failure
+  - Decision Records / Authority and Custody / Assumptions / Evidence / Transition Records / Supersession Records
+- **Upstream Origin:** Any (the producer of the time-bound artifact)
+- **Deterministic Output:** Failure (missing/ambiguous time binding)
+
+#### FC-0202  TIME_INVALID_EVIDENCE
+- **Primary Bundle Section:** Evidence
+- **Upstream Origin:** Evidence-producing systems; DADS provides references
+- **Deterministic Output:** Failure (evidence not available at decision time)
+
+#### FC-0203  POST_HOC_RATIONALE
+- **Primary Bundle Section:** Decision Records
 - **Upstream Origin:** DADS
-- **Deterministic Output:** Failures (missing dependency list)
-- **Primary Diagnostic:** Decision provenance gap
+- **Deterministic Output:** Failure (rationale contaminated by hindsight)
+
+#### FC-0204  POST_HOC_ASSUMPTION
+- **Primary Bundle Section:** Assumptions
+- **Upstream Origin:** Cairn
+- **Deterministic Output:** Failure (assumption declared after decision time)
+
+#### FC-0205  POST_HOC_EVIDENCE
+- **Primary Bundle Section:** Evidence
+- **Upstream Origin:** Evidence-producing systems
+- **Deterministic Output:** Failure (post-outcome evidence misused as constraint)
 
 ---
 
-### F-AUTH-001  Missing AuthorityGrant
+### Stage 3  Authority Resolution
 
-- **Trigger:** Decision references an approver or role without a time-bounded authority grant.
-- **Pipeline Stage:** Authority resolution
-- **Expected Bundle Section:** Authority & Custody
+#### FC-0301  AUTHORITY_NOT_FOUND
+- **Primary Bundle Section:** Authority and Custody
 - **Upstream Origin:** ChainLogic-DCCS (or governance registry feeding it)
-- **Deterministic Output:** Failures (unresolved authority dependency)
+- **Deterministic Output:** Failure (missing AuthorityGrant dependency)
 
----
-
-### F-AUTH-002  Ambiguous Authority Scope
-
-- **Trigger:** Multiple authority grants plausibly apply, or scope cannot be resolved deterministically.
-- **Pipeline Stage:** Authority type checking
-- **Expected Bundle Section:** Authority & Custody
+#### FC-0302  AUTHORITY_SCOPE_MISMATCH
+- **Primary Bundle Section:** Authority and Custody
 - **Upstream Origin:** ChainLogic-DCCS
-- **Deterministic Output:** Failures (type failure)
+- **Deterministic Output:** Failure (grant exists; scope does not authorize action)
 
----
-
-### F-ASM-001  Missing AssumptionDeclaration
-
-- **Trigger:** A decision requires an assumption (safety, equivalence, reversibility, etc.) that was never declared.
-- **Pipeline Stage:** Assumption binding
-- **Expected Bundle Section:** Assumptions
-- **Upstream Origin:** Cairn
-- **Deterministic Output:** Failures (missing assumption inventory)
-
----
-
-### F-ASM-002  Unbounded / Non-Time-Bound Assumption
-
-- **Trigger:** Assumption lacks a declaration timestamp, scope, or expiration semantics.
-- **Pipeline Stage:** Assumption temporal validation
-- **Expected Bundle Section:** Assumptions
-- **Upstream Origin:** Cairn
-- **Deterministic Output:** Failures (temporal validity failure)
-
----
-
-### F-EVD-001  Missing EvidenceArtifact
-
-- **Trigger:** Decision asserts evidence exists, but no evidence artifact is present at decision-time.
-- **Pipeline Stage:** Evidence dependency resolution
-- **Expected Bundle Section:** Evidence
-- **Upstream Origin:** DADS (references) + evidence system(s)
-- **Deterministic Output:** Failures (unresolved evidence dependency)
-
----
-
-### F-EVD-002  Post-Outcome Evidence Used as Justification
-
-- **Trigger:** Evidence timestamp occurs after the decision but is treated as supporting decision-time epistemic state.
-- **Pipeline Stage:** Evidence time-binding
-- **Expected Bundle Section:** Evidence
-- **Upstream Origin:** Any (evidence-producing systems)
-- **Deterministic Output:** Failures (time-binding violation)
-
----
-
-### F-CUS-001  Broken Custody Chain
-
-- **Trigger:** Artifact custody cannot be traced across time, systems, or custodians.
-- **Pipeline Stage:** Custody verification
-- **Expected Bundle Section:** Authority & Custody
+#### FC-0303  AUTHORITY_AMBIGUOUS
+- **Primary Bundle Section:** Authority and Custody
 - **Upstream Origin:** ChainLogic-DCCS
-- **Deterministic Output:** Failures (custody integrity failure)
+- **Deterministic Output:** Failure (multiple plausible authority paths; none bound)
+
+#### FC-0304  EMERGENCY_AUTHORITY_UNDECLARED
+- **Primary Bundle Section:** Authority and Custody
+- **Upstream Origin:** ChainLogic-DCCS
+- **Deterministic Output:** Failure (emergency class actions require explicit grant)
+
+#### FC-0305  RETROACTIVE_AUTHORITY_GRANT
+- **Primary Bundle Section:** Authority and Custody
+- **Upstream Origin:** ChainLogic-DCCS
+- **Deterministic Output:** Failure (authority granted after-the-fact)
 
 ---
 
-### F-TRN-001  Missing TransitionRecord
+### Stage 4  Assumption Closure
 
-- **Trigger:** Role/authority/system state transition occurred without explicit TransitionRecord.
-- **Pipeline Stage:** Transition normalization
-- **Expected Bundle Section:** Transitions
+#### FC-0401  ASSUMPTION_MISSING
+- **Primary Bundle Section:** Assumptions
+- **Upstream Origin:** Cairn
+- **Deterministic Output:** Failure (missing assumption inventory)
+
+#### FC-0402  ASSUMPTION_UNSCOPED
+- **Primary Bundle Section:** Assumptions
+- **Upstream Origin:** Cairn
+- **Deterministic Output:** Failure (scope not enforceable)
+
+#### FC-0403  ASSUMPTION_CONTRADICTION
+- **Primary Bundle Section:** Assumptions + Supersession Records (if resolved by supersession)
+- **Upstream Origin:** Cairn (assumptions) + any producer of supersession records
+- **Deterministic Output:** Failure (conflict without explicit resolution)
+
+#### FC-0404  ASSUMPTION_UNREVIEWABLE
+- **Primary Bundle Section:** Assumptions
+- **Upstream Origin:** Cairn
+- **Deterministic Output:** Failure (indefinite assumption without review/expiration)
+
+---
+
+### Stage 5  Custody Integrity
+
+#### FC-0501  CUSTODY_GAP
+- **Primary Bundle Section:** Authority and Custody
+- **Upstream Origin:** ChainLogic-DCCS
+- **Deterministic Output:** Failure (custody chain incomplete)
+
+#### FC-0502  TRANSITION_UNRECORDED
+- **Primary Bundle Section:** Transition Records
 - **Upstream Origin:** ChainLogic-DCCS (and operational transition feeders)
-- **Deterministic Output:** Failures (missing transition dependency)
+- **Deterministic Output:** Failure (missing transition dependency)
+
+#### FC-0503  PROVENANCE_UNVERIFIED
+- **Primary Bundle Section:** Integrity (optional) + Authority and Custody + Failure
+- **Upstream Origin:** ChainLogic-DCCS (custody/provenance) + Veridion (optional integrity states)
+- **Deterministic Output:** Failure (cannot establish provenance/integrity where required)
 
 ---
 
-### F-SUP-001  Silent Mutation Detected (No SupersessionRecord)
+### Stage 6  Mutation & Supersession
 
-- **Trigger:** Artifact appears altered without a supersession record.
-- **Pipeline Stage:** Mutation / supersession enforcement
-- **Expected Bundle Section:** Supersessions
-- **Upstream Origin:** Any (but custody systems must surface)
-- **Deterministic Output:** Failures (mutation violation)
+#### FC-0601  MUTATION_DETECTED
+- **Primary Bundle Section:** Supersession Records
+- **Upstream Origin:** Any (artifact producers) + custody systems must surface
+- **Deterministic Output:** Failure (mutation without explicit supersession)
+
+#### FC-0602  SUPERSESSION_MISSING
+- **Primary Bundle Section:** Supersession Records
+- **Upstream Origin:** Any (artifact producers responsible for correction discipline)
+- **Deterministic Output:** Failure (correction without SupersessionRecord)
+
+#### FC-0603  SUPERSESSION_CHAIN_BROKEN
+- **Primary Bundle Section:** Supersession Records
+- **Upstream Origin:** Any (artifact producers)
+- **Deterministic Output:** Failure (invalid lineage)
 
 ---
 
-### F-IRR-001  Irreversibility Marker Triggered
+### Stage 7  Narrative Constraint Gate
 
-- **Trigger:** Reconstruction requires fabrication (authority/assumption/intent must be invented).
-- **Pipeline Stage:** Terminal validity check
-- **Expected Bundle Section:** Failures (and optionally Integrity)
-- **Upstream Origin:** Emergent condition (not a single system)
-- **Deterministic Output:** Failures (irreversibility declaration)
+#### FC-0701  TRUTH_LOCK_MISSING
+- **Primary Bundle Section:** Failure (and optionally Integrity)
+- **Upstream Origin:** Emergent condition (not a single upstream system)
+- **Deterministic Output:** Failure (irreversibility reached without required freezes)
+
+#### FC-0702  NARRATIVE_UNDERCONSTRAINED
+- **Primary Bundle Section:** Failure
+- **Upstream Origin:** Emergent condition (record is insufficient across multiple domains)
+- **Deterministic Output:** Failure (multiple incompatible explanations remain possible)
+
+#### FC-0703  COMPETING_EXPLANATIONS_UNBOUND
+- **Primary Bundle Section:** Failure
+- **Upstream Origin:** Emergent condition (competing explanations exist; bindings missing)
+- **Deterministic Output:** Failure (cannot force convergence without decision-time artifacts)
+
+#### FC-0704  RETROACTIVE_IRREVERSIBILITY_MARKER
+- **Primary Bundle Section:** Failure
+- **Upstream Origin:** Any producer attempting retroactive locking; governance must bind at threshold
+- **Deterministic Output:** Failure (retroactive truth-lock attempt)
 
 ---
 
-### F-CHK-001  Checksum / Integrity Marker Mismatch
+### Stage 8  Emit
 
-- **Trigger:** Bundle contents do not match integrity markers.
-- **Pipeline Stage:** Bundle sealing / verification
-- **Expected Bundle Section:** Checksums
+#### FC-0801  FAILURE_BUNDLE_EMIT
+- **Primary Bundle Section:** Failure
 - **Upstream Origin:** Bundle generation process
-- **Deterministic Output:** Failures (bundle integrity failure)
+- **Deterministic Output:** Failure (output marker; not a cause)
 
 ---
 
