@@ -2,46 +2,61 @@
 
 ## Purpose
 
-This document defines the canonical failure types emitted by GOS-FC.
+This document defines the **canonical failure types** emitted by GOS-FC.
 
 Failures are not exceptions.
-They are **deliverable artifacts**.
+They are **first-class, deliverable forensic artifacts**.
 
-Every failure type below must be:
-- deterministic
-- reproducible
-- explainable in terms of violated rules and missing dependencies
+Every failure defined here is:
+- deterministic (same inputs  same failure)
+- reproducible (replayable from the input bundle)
+- explainable in structural terms (rules violated, dependencies missing)
 - non-narrative (no blame, no intent, no causality inference)
 
-If a situation is covered by this catalog, the compiler must emit the specified failure.
-If no failure applies, the catalog must be amended explicitly (not patched ad-hoc in code).
+If a situation is covered by this catalog, the compiler **must** emit the specified failure.
+If no failure applies, the catalog must be amended explicitly  not patched ad hoc in implementation.
+
+---
+
+## How to Read This Catalog
+
+Each failure entry answers five questions:
+
+1. **What structural condition is violated?**
+2. **At which pipeline stage is the violation detected?**
+3. **Why compilation cannot safely proceed past this point**
+4. **What explicit dependencies are missing or invalid**
+5. **Why inference or reconstruction is forbidden**
+
+Failures do **not** explain what happened.
+They explain **why accountable truth cannot be compiled**.
 
 ---
 
 ## Failure Artifact Structure (Conceptual)
 
-Every failure output must contain:
+Every emitted failure artifact must include:
 
-- `failure_id` (unique)
-- `failure_type` (one of the canonical types below)
-- `pipeline_stage` (from compiler/PIPELINE.md)
-- `trigger_summary` (13 sentences, non-narrative)
-- `violated_rules` (list of rule IDs)
-- `unresolved_dependencies` (list of missing/invalid refs)
-- `time_context` (key timestamps used in evaluation)
-- `reproducibility` (input bundle hash/manifest id in later phases)
+- `failure_id`  unique identifier for this failure instance
+- `failure_type`  one of the canonical types below
+- `pipeline_stage`  stage identifier from `compiler/PIPELINE.md`
+- `trigger_summary`  concise, non-narrative description (13 sentences)
+- `violated_rules`  list of rule identifiers
+- `unresolved_dependencies`  missing, invalid, or ambiguous references
+- `time_context`  timestamps used for evaluation
+- `reproducibility`  input bundle or manifest reference
 
 ---
 
 ## Severity (Non-Scoring)
 
-Severity is non-numeric and non-probabilistic:
+Severity is **non-numeric** and **non-probabilistic**.
 
-- `BLOCKER`  compilation cannot proceed
+- `BLOCKER`  compilation must halt
 - `GATE`  compilation may proceed only if explicitly allowed by doctrine (rare)
-- `WARN`  emitted only when explicitly allowed; must not enable compilation if dependencies are missing
+- `WARN`  informational marker; must never enable compilation if dependencies are missing
 
-Default is `BLOCKER`.
+Default severity is `BLOCKER`.
 
 ---
 
@@ -53,34 +68,34 @@ Default is `BLOCKER`.
 **Trigger:** Artifact cannot be parsed, normalized, or identified.
 
 **Examples:**
-- missing artifact_type
+- missing `artifact_type`
 - malformed timestamps
 - invalid encoding
 
 **Must include:**
-- offending artifact id/path (if available)
-- parse error details (non-sensitive)
+- offending artifact identifier or path (if available)
+- non-sensitive parse error details
 
 ---
 
 ### FC-0002  UNKNOWN_ARTIFACT_TYPE
 **Severity:** BLOCKER  
-**Stage:** 01  
-**Trigger:** `artifact_type` not defined in schemas/ARTIFACT_TYPES.md.
+**Stage:** 0  
+**Trigger:** `artifact_type` is not defined in `schemas/ARTIFACT_TYPES.md`.
 
 ---
 
 ### FC-0003  DUPLICATE_ID
 **Severity:** BLOCKER  
 **Stage:** 0  
-**Trigger:** Two artifacts share the same `id`.
+**Trigger:** Two artifacts share the same identifier.
 
 ---
 
 ### FC-0101  SCHEMA_VIOLATION
 **Severity:** BLOCKER  
 **Stage:** 1 (Structural Validation)  
-**Trigger:** Artifact violates its conceptual schema requirements.
+**Trigger:** Artifact violates its conceptual schema.
 
 **Must include:**
 - missing required fields
@@ -92,18 +107,14 @@ Default is `BLOCKER`.
 ### FC-0201  TIME_UNBOUND_ARTIFACT
 **Severity:** BLOCKER  
 **Stage:** 2 (Time Binding)  
-**Trigger:** A required time field is missing/ambiguous/disputed.
-
-**Examples:**
-- EvidenceArtifact missing `available_at`
-- TransitionRecord missing `effective_at`
+**Trigger:** Required time field is missing, ambiguous, or disputed.
 
 ---
 
 ### FC-0202  TIME_INVALID_EVIDENCE
 **Severity:** BLOCKER  
 **Stage:** 2  
-**Trigger:** Evidence referenced by a DecisionRecord was not available at decision time.
+**Trigger:** Evidence referenced by a decision was not available at decision time.
 
 **Rule:**  
 If `EvidenceArtifact.available_at` > `DecisionRecord.effective_at`  fail.
@@ -113,143 +124,143 @@ If `EvidenceArtifact.available_at` > `DecisionRecord.effective_at`  fail.
 ### FC-0203  POST_HOC_RATIONALE
 **Severity:** BLOCKER  
 **Stage:** 2  
-**Trigger:** Decision rationale references later outcomes, investigations, or hindsight framing.
+**Trigger:** Decision rationale references outcomes, investigations, or hindsight unavailable at decision time.
 
 ---
 
 ### FC-0204  POST_HOC_ASSUMPTION
 **Severity:** BLOCKER  
 **Stage:** 2  
-**Trigger:** AssumptionDeclaration is created after decision time and used to justify a prior decision.
+**Trigger:** Assumption is declared after decision time and used retroactively.
 
 ---
 
 ### FC-0205  POST_HOC_EVIDENCE
 **Severity:** BLOCKER  
 **Stage:** 2  
-**Trigger:** EvidenceArtifact introduced to rationalize an already executed decision rather than constrain it.
+**Trigger:** Evidence is introduced to justify an already executed decision rather than constrain it.
 
 ---
 
 ### FC-0301  AUTHORITY_NOT_FOUND
 **Severity:** BLOCKER  
 **Stage:** 3 (Authority Resolution)  
-**Trigger:** A DecisionRecord/Transition/Supersession references no AuthorityGrant, or referenced grants do not exist.
+**Trigger:** No AuthorityGrant exists for a referenced decision or transition.
 
 ---
 
 ### FC-0302  AUTHORITY_SCOPE_MISMATCH
 **Severity:** BLOCKER  
 **Stage:** 3  
-**Trigger:** Referenced AuthorityGrant exists but does not authorize the decision/transition action within scope constraints.
+**Trigger:** Referenced AuthorityGrant does not authorize the action within declared scope.
 
 ---
 
 ### FC-0303  AUTHORITY_AMBIGUOUS
 **Severity:** BLOCKER  
 **Stage:** 3  
-**Trigger:** Multiple plausible authority paths exist and the record does not bind which one applies.
+**Trigger:** Multiple plausible authority paths exist and none are explicitly bound.
 
 **Note:**  
-Ambiguity is not resolved by heuristics.
+Ambiguity is not resolved heuristically.
 
 ---
 
 ### FC-0304  EMERGENCY_AUTHORITY_UNDECLARED
 **Severity:** BLOCKER  
 **Stage:** 3  
-**Trigger:** Actions treated as emergency occur without an explicit emergency-authorizing AuthorityGrant.
+**Trigger:** Emergency actions occur without explicit emergency authority.
 
 ---
 
 ### FC-0305  RETROACTIVE_AUTHORITY_GRANT
 **Severity:** BLOCKER  
 **Stage:** 3  
-**Trigger:** AuthorityGrant is issued after the relevant decision/transition and used to legitimize earlier actions.
+**Trigger:** Authority is granted after the fact to legitimize earlier actions.
 
 ---
 
 ### FC-0401  ASSUMPTION_MISSING
 **Severity:** BLOCKER  
 **Stage:** 4 (Assumption Closure)  
-**Trigger:** Decision depends on assumptions not declared via AssumptionDeclaration.
+**Trigger:** Decision depends on undeclared assumptions.
 
 ---
 
 ### FC-0402  ASSUMPTION_UNSCOPED
 **Severity:** BLOCKER  
 **Stage:** 4  
-**Trigger:** AssumptionDeclaration lacks enforceable scope or applicability boundaries.
+**Trigger:** Assumption lacks enforceable scope.
 
 ---
 
 ### FC-0403  ASSUMPTION_CONTRADICTION
 **Severity:** BLOCKER  
 **Stage:** 4  
-**Trigger:** Two or more in-scope assumptions conflict and conflict is not resolved by explicit supersession.
+**Trigger:** In-scope assumptions conflict without explicit resolution.
 
 ---
 
 ### FC-0404  ASSUMPTION_UNREVIEWABLE
 **Severity:** BLOCKER  
 **Stage:** 4  
-**Trigger:** Assumption has indefinite life without review triggers/requirements.
+**Trigger:** Assumption persists indefinitely without review or expiration.
 
 ---
 
 ### FC-0501  CUSTODY_GAP
 **Severity:** BLOCKER  
 **Stage:** 5 (Custody Integrity)  
-**Trigger:** Required custody chain is missing links across the needed time window.
+**Trigger:** Required custody chain is incomplete.
 
 ---
 
 ### FC-0502  TRANSITION_UNRECORDED
 **Severity:** BLOCKER  
 **Stage:** 5  
-**Trigger:** A governance-relevant transition is implied but no TransitionRecord exists.
+**Trigger:** Governance-relevant transition lacks a TransitionRecord.
 
 ---
 
 ### FC-0503  PROVENANCE_UNVERIFIED
 **Severity:** BLOCKER  
 **Stage:** 5  
-**Trigger:** Integrity or provenance cannot be established where required (missing hashes, missing verification, unexplained changes).
+**Trigger:** Integrity or provenance cannot be established.
 
 ---
 
 ### FC-0601  MUTATION_DETECTED
 **Severity:** BLOCKER  
 **Stage:** 6 (Mutation & Supersession)  
-**Trigger:** Artifact content differs across versions without explicit supersession chain.
+**Trigger:** Artifact content changes without explicit supersession.
 
 ---
 
 ### FC-0602  SUPERSESSION_MISSING
 **Severity:** BLOCKER  
 **Stage:** 6  
-**Trigger:** A correction/replacement occurs without a SupersessionRecord linking old  new.
+**Trigger:** Correction occurs without a SupersessionRecord.
 
 ---
 
 ### FC-0603  SUPERSESSION_CHAIN_BROKEN
 **Severity:** BLOCKER  
 **Stage:** 6  
-**Trigger:** Supersession lineage is incomplete, cyclic, or references non-existent artifacts.
+**Trigger:** Supersession lineage is incomplete, cyclic, or invalid.
 
 ---
 
 ### FC-0701  TRUTH_LOCK_MISSING
 **Severity:** BLOCKER  
 **Stage:** 7 (Narrative Constraint Gate)  
-**Trigger:** Irreversibility is reached but required artifact classes were not frozen at or before threshold.
+**Trigger:** Irreversibility is reached before required artifacts are frozen.
 
 ---
 
 ### FC-0702  NARRATIVE_UNDERCONSTRAINED
 **Severity:** BLOCKER  
 **Stage:** 7  
-**Trigger:** The available artifacts permit multiple incompatible explanations because binding records are missing.
+**Trigger:** Available artifacts permit multiple incompatible explanations.
 
 **Important:**  
 GOS-FC does not choose narratives; it fails.
@@ -259,44 +270,43 @@ GOS-FC does not choose narratives; it fails.
 ### FC-0703  COMPETING_EXPLANATIONS_UNBOUND
 **Severity:** BLOCKER  
 **Stage:** 7  
-**Trigger:** Two or more official/operative explanations exist, and the record cannot force convergence using decision-time artifacts.
+**Trigger:** Multiple official explanations exist without binding records.
 
 ---
 
 ### FC-0704  RETROACTIVE_IRREVERSIBILITY_MARKER
 **Severity:** BLOCKER  
 **Stage:** 7  
-**Trigger:** IrreversibilityMarker is created after the threshold in a way that enables narrative laundering.
+**Trigger:** IrreversibilityMarker is introduced after threshold to enable reconstruction.
 
 ---
 
 ### FC-0801  FAILURE_BUNDLE_EMIT
 **Severity:** WARN (output marker, not a cause)  
 **Stage:** 8 (Emit)  
-**Trigger:** Any BLOCKER failure occurred; compiler emits a deterministic failure bundle.
+**Trigger:** One or more BLOCKER failures occurred; compiler emits failure bundle.
 
 ---
 
-## Canonical Non-Goals (Failure Catalog)
+## Canonical Non-Goals (Failure Semantics)
 
 The compiler must never emit failures that:
 - assign blame
 - infer intent
 - claim causality
-- score risk probability
-- declare legality/ethics
+- score risk
+- declare legality or ethics
 
-Failures are structural: missing bindings, missing dependencies, invalid time/authority/custody.
+Failures describe **structural impossibility**, not wrongdoing.
 
 ---
 
 ## Amendment Rule
 
 This catalog may be amended only by:
-- explicit commit changing this file
-- a new failure ID
-- a deterministic trigger definition
-- mapping to pipeline stage(s)
+- explicit commit modifying this file
+- introduction of a new failure identifier
+- deterministic trigger definition
+- explicit mapping to pipeline stage(s)
 
-No implementation may introduce an unnamed failure type.
-
+No implementation may introduce unnamed or implicit failure types.
